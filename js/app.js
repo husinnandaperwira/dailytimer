@@ -216,6 +216,7 @@ const FocusTimer = window.FocusTimer = {
 // ---------------------------------------------------------------------------
 const TaskManager = window.TaskManager = {
   tasks: [],
+  _draggingId: null,
 
   addTask(label) {
     const trimmed = label.trim();
@@ -256,6 +257,25 @@ const TaskManager = window.TaskManager = {
     TaskManager.render();
   },
 
+  moveTask(dragId, overId, insertAfter) {
+    const fromIndex = TaskManager.tasks.findIndex(function (t) { return t.id === dragId; });
+    const overIndexBefore = TaskManager.tasks.findIndex(function (t) { return t.id === overId; });
+    if (fromIndex === -1 || overIndexBefore === -1) return;
+    if (fromIndex === overIndexBefore) return;
+
+    const moved = TaskManager.tasks.splice(fromIndex, 1)[0];
+    const overIndex = TaskManager.tasks.findIndex(function (t) { return t.id === overId; });
+    if (overIndex === -1) {
+      TaskManager.tasks.push(moved);
+    } else {
+      const insertIndex = insertAfter ? overIndex + 1 : overIndex;
+      TaskManager.tasks.splice(insertIndex, 0, moved);
+    }
+
+    TaskManager.save();
+    TaskManager.render();
+  },
+
   save() {
     Storage.set('tasks', TaskManager.tasks);
   },
@@ -266,7 +286,15 @@ const TaskManager = window.TaskManager = {
     list.innerHTML = '';
     TaskManager.tasks.forEach(function (task) {
       const li = document.createElement('li');
+      li.setAttribute('data-task-id', task.id);
       if (task.completed) li.classList.add('completed');
+
+      const handle = document.createElement('button');
+      handle.type = 'button';
+      handle.className = 'task-drag-handle';
+      handle.textContent = '⋮⋮';
+      handle.setAttribute('aria-label', 'Drag to reorder');
+      handle.draggable = true;
 
       const labelSpan = document.createElement('span');
       labelSpan.className = 'task-label';
@@ -309,6 +337,7 @@ const TaskManager = window.TaskManager = {
         TaskManager.deleteTask(task.id);
       });
 
+      li.appendChild(handle);
       li.appendChild(toggleBtn);
       li.appendChild(labelSpan);
       li.appendChild(editInput);
@@ -340,6 +369,67 @@ const TaskManager = window.TaskManager = {
             if (dupMsg) dupMsg.classList.add('hidden');
           }
         }
+      });
+    }
+
+    const list = document.getElementById('task-list');
+    if (list) {
+      const clearDropTargets = function () {
+        Array.prototype.forEach.call(list.querySelectorAll('.task-drop-target'), function (el) {
+          el.classList.remove('task-drop-target');
+        });
+      };
+
+      list.addEventListener('dragstart', function (e) {
+        const handle = e.target && e.target.closest ? e.target.closest('.task-drag-handle') : null;
+        if (!handle) return;
+        const li = handle.closest('li');
+        if (!li) return;
+        const id = li.getAttribute('data-task-id');
+        if (!id) return;
+
+        TaskManager._draggingId = id;
+        li.classList.add('task-dragging');
+
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = 'move';
+          try { e.dataTransfer.setData('text/plain', id); } catch {}
+        }
+      });
+
+      list.addEventListener('dragend', function () {
+        const dragging = list.querySelector('li.task-dragging');
+        if (dragging) dragging.classList.remove('task-dragging');
+        clearDropTargets();
+        TaskManager._draggingId = null;
+      });
+
+      list.addEventListener('dragover', function (e) {
+        if (!TaskManager._draggingId) return;
+        const li = e.target && e.target.closest ? e.target.closest('li') : null;
+        if (!li || !list.contains(li)) return;
+        e.preventDefault();
+
+        clearDropTargets();
+        li.classList.add('task-drop-target');
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      });
+
+      list.addEventListener('drop', function (e) {
+        if (!TaskManager._draggingId) return;
+        const li = e.target && e.target.closest ? e.target.closest('li') : null;
+        if (!li || !list.contains(li)) return;
+        e.preventDefault();
+
+        const overId = li.getAttribute('data-task-id');
+        const dragId = TaskManager._draggingId;
+        if (!overId || !dragId || overId === dragId) return;
+
+        const rect = li.getBoundingClientRect();
+        const insertAfter = (e.clientY - rect.top) > rect.height / 2;
+
+        TaskManager.moveTask(dragId, overId, insertAfter);
+        clearDropTargets();
       });
     }
   },

@@ -214,6 +214,37 @@ body {
   border-bottom: 1px solid #f0f0f0;
 }
 
+.task-drag-handle {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: var(--text-muted);
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  font-size: 0.85rem;
+}
+
+.task-drag-handle:active {
+  cursor: grabbing;
+}
+
+#task-list li.task-dragging {
+  opacity: 0.4;
+}
+
+#task-list li.task-drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
 /* Checkbox toggle button styled as checkbox */
 .task-toggle-btn {
   width: 18px;
