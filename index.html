@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="dashboard">
+
+    <!-- Greeting Module — full width top -->
+    <section id="greeting-module" class="module module--greeting">
+      <time id="time-display"></time>
+      <p id="date-display"></p>
+      <p id="greeting-text"></p>
+      <form id="name-form">
+        <input id="name-input" type="text" placeholder="Enter your name…" autocomplete="off" maxlength="40" />
+        <button type="submit">Save</button>
+      </form>
+    </section>
+
+    <!-- Row: Focus Timer (left) + Task Manager (right) -->
+    <div class="row-two">
+
+      <!-- Focus Timer -->
+      <section id="focus-timer" class="module">
+        <h2>Focus Timer</h2>
+        <div id="timer-display">25:00</div>
+        <div id="timer-completion" class="hidden">Session complete!</div>
+        <div class="timer-controls">
+          <button id="timer-start">Start</button>
+          <button id="timer-stop">Stop</button>
+          <button id="timer-reset">Reset</button>
+        </div>
+        <form id="timer-duration-form">
+          <input id="timer-duration-input" type="number" min="1" max="120" placeholder="Minutes" />
+          <button type="submit">Set</button>
+        </form>
+      </section>
+
+      <!-- Task Manager -->
+      <section id="task-manager" class="module">
+        <h2>Tasks</h2>
+        <form id="task-form">
+          <input id="task-input" type="text" placeholder="Add a new task..." autocomplete="off" />
+          <button type="submit">Add</button>
+        </form>
+        <p id="task-duplicate-msg" class="hidden">Task already exists!</p>
+        <ul id="task-list"></ul>
+      </section>
+
+    </div>
+
+    <!-- Quick Links — bottom left, aligned under Focus Timer -->
+    <div class="row-bottom">
+      <section id="quick-links" class="module">
+        <h2>Quick Links</h2>
+        <form id="links-form">
+          <input id="link-label-input" type="text" placeholder="Link name" autocomplete="off" />
+          <input id="link-url-input" type="url" placeholder="URL" autocomplete="off" />
+          <button type="submit">Add Link</button>
+        </form>
+        <ul id="links-list"></ul>
+      </section>
+      <!-- empty spacer to keep grid balanced -->
+      <div></div>
+    </div>
+
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
