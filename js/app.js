@@ -227,7 +227,7 @@ const TaskManager = window.TaskManager = {
     });
     if (duplicate) return 'duplicate';
     const task = { id: String(Date.now()), label: trimmed, completed: false };
-    TaskManager.tasks.push(task);
+    TaskManager.tasks.unshift(task);
     TaskManager.save();
     TaskManager.render();
     return true;
